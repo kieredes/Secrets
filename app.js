@@ -1,4 +1,7 @@
 //jshint esversion:6
+//added dotenv on the top as environment vairable
+
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -10,6 +13,7 @@ const encrypt= require("mongoose-encryption");
 
 const app = express();
 
+//console.log(process.env.API_KEY)
 
 // static resource for public folder
 app.use(express.static("public"));
@@ -34,8 +38,12 @@ const userSchema = new mongoose.Schema({
 });
 
 // adding a secret
-const secret = "ThisisourSecret."
+//move the secret to .env
+//const secret = "ThisisourSecret."
 //encrypt entire DB
+
+//called the secret var from .env 
+var secret=process.env.SECRET
 userSchema.plugin(encrypt,{secret: secret, encryptedFields: ["password"]});
 
 
