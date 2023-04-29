@@ -5,6 +5,9 @@ const ejs = require("ejs");
 
 const mongoose = require("mongoose");
 
+//encryption
+const encrypt= require("mongoose-encryption");
+
 const app = express();
 
 
@@ -24,10 +27,17 @@ mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
 
 
 //create a schema after connecting to mongoose
-const userSchema = {
+// added a mongoose.schema level2
+const userSchema = new mongoose.Schema({
     email: String,
     password: String
-};
+});
+
+// adding a secret
+const secret = "ThisisourSecret."
+//encrypt entire DB
+userSchema.plugin(encrypt,{secret: secret, encryptedFields: ["password"]});
+
 
 
 const User = new mongoose.model("User", userSchema);
@@ -75,17 +85,31 @@ app.post("/login", function(req,res){
     const username = req.body.username;
     const password = req.body.password;
     
-    User.findOne({email: username}, function(err, foundUser){
-        if (err){
-            console.log(err);
-        }else{
-            if (foundUser){
-                if (foundUser.password === password){
-                    res.render("secrets")
-                }
+    // User.findOne({email: username}, function(err, foundUser){
+    //     if (err){
+    //         console.log(err);
+    //     }else{
+    //         if (foundUser){
+    //             if (foundUser.password === password){
+    //                 res.render("secrets")
+    //             }
+    //         }
+    //     }
+    // }); module.findOne has been updated to async
+    async function find(username, password) {
+        try {
+            const found = await User.findOne({ email: username });
+            if (found.password == password) {
+                res.render("secrets")
+            } else {
+                console.log("wrong password");
             }
+        } catch (error) {
+            console.log(error)
         }
-    });
+ 
+    }
+    find(username, password);
 
 });
 
